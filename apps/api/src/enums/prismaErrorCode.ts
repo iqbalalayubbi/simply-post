@@ -1,0 +1,27 @@
+enum PrismaErrorCode {
+  // Constraint violations
+  UNIQUE_CONSTRAINT = "P2002",
+  FOREIGN_KEY_CONSTRAINT = "P2003",
+  NULL_CONSTRAINT = "P2011",
+
+  // Record operations
+  RECORD_NOT_FOUND = "P2025",
+  RECORD_REQUIRED_CONNECTED = "P2018",
+
+  // Data validation
+  VALUE_TOO_LONG = "P2000",
+  VALUE_OUT_OF_RANGE = "P2020",
+  INCONSISTENT_COLUMN_DATA = "P2023",
+
+  // Connection & timeout
+  CONNECTION_ERROR = "P1001",
+  CONNECTION_TIMEOUT = "P1008",
+  DATABASE_TIMEOUT = "P1017",
+
+  // Query errors
+  INVALID_QUERY = "P2009",
+  MISSING_REQUIRED_VALUE = "P2012",
+  MISSING_REQUIRED_ARGUMENT = "P2019",
+}
+
+export default PrismaErrorCode;
