@@ -11,14 +11,12 @@ const errorHandler = (err: AppError, req: Request, res: Response) => {
     });
   }
 
-  console.log(err);
-
-  // // not found route
-  // return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-  //   status: "error",
-  //   message: "Internal server error",
-  //   data: null,
-  // });
+  // not found route
+  return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+    status: "error",
+    message: "Internal server error",
+    data: null,
+  });
 };
 
 export default errorHandler;

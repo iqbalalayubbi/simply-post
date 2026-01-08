@@ -30,11 +30,12 @@ class UserService {
       }
 
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        console.log({ code: error.code });
         switch (error.code) {
           case PrismaErrorCode.UNIQUE_CONSTRAINT:
-            const field = (error.meta?.target as string[])?.[0] || "field";
-            throw new ConflictError(`${field} already exist`);
+            const meta = error.meta as any;
+            const constraintFields =
+              meta?.driverAdapterError?.cause?.constraint?.fields;
+            throw new ConflictError(`${constraintFields[0]} already exist`);
 
           case PrismaErrorCode.NULL_CONSTRAINT:
             throw new ValidationError("Required field is missing");
@@ -43,9 +44,6 @@ class UserService {
             throw new InternalServerError("Database operation failed");
         }
       }
-
-      console.log(error);
-
       throw new InternalServerError("Failed to create user");
     }
   }
