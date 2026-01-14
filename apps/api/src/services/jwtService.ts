@@ -5,11 +5,12 @@ import jwt from "jsonwebtoken";
 
 class JwtService {
   generateTokens(jwtPayload: JwtPayload) {
-    const accessToken = jwt.sign(jwtPayload, config.JWT_ACCESS_SECRET, {
+    const { exp, iat, ...payload } = jwtPayload;
+    const accessToken = jwt.sign(payload, config.JWT_ACCESS_SECRET, {
       expiresIn: config.JWT_ACCESS_EXPIRES_IN,
     });
 
-    const refreshToken = jwt.sign(jwtPayload, config.JWT_REFRESH_SECRET, {
+    const refreshToken = jwt.sign(payload, config.JWT_REFRESH_SECRET, {
       expiresIn: config.JWT_REFRESH_EXPIRES_IN,
     });
 
