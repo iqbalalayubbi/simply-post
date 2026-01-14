@@ -22,4 +22,9 @@ const registerSchema = z.object({
   bio: z.string().optional(),
 });
 
-export { registerSchema };
+const loginSchema = z.object({
+  identifier: z.string(),
+  password: z.string(),
+});
+
+export { registerSchema, loginSchema };

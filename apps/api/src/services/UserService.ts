@@ -48,16 +48,17 @@ class UserService {
     }
   }
 
-  async getUser(id: number) {
+  async getUser(
+    filter: { id?: number; email?: string; username?: string },
+    omitPassword = true
+  ) {
     try {
-      const userData = prisma.user.findFirst({
-        where: { id },
-        omit: { password: true },
+      const userData = await prisma.user.findFirst({
+        where: filter,
+        omit: { password: omitPassword },
       });
 
-      if (!userData) {
-        throw new NotFoundError("User not found");
-      }
+      if (!userData) throw new NotFoundError("User not found");
 
       return userData;
     } catch (error) {
@@ -71,7 +72,7 @@ class UserService {
         }
       }
 
-      throw new InternalServerError("Failed to get user data");
+      throw error;
     }
   }
 }
