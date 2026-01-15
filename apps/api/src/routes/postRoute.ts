@@ -19,5 +19,6 @@ router.get(
   validateRequest(getPostsSchema, "query"),
   postController.getAllPosts
 );
+router.get("/:id", postController.getPostById);
 
 export default router;

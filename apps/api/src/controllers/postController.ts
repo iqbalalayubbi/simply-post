@@ -19,6 +19,17 @@ class PostController {
     res.status(HttpStatus.CREATED).json(response);
   };
 
+  getPostById = async (req: Request, res: Response) => {
+    const post = await this.postService.getById(Number(req.params.id));
+    const response: ResponseType = {
+      data: post,
+      message: "Received post successfully",
+      status: "success",
+    };
+
+    res.status(HttpStatus.OK).json(response);
+  };
+
   getAllPosts = async (req: Request, res: Response) => {
     const params = {
       limit: Number(req.query?.limit ?? 5),

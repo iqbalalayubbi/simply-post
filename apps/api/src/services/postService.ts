@@ -1,5 +1,7 @@
 import prisma from "../config/prisma";
-import { InternalServerError } from "../libs/appError";
+import { PrismaErrorCode } from "../enums";
+import { Prisma } from "../generated/prisma/client";
+import { InternalServerError, NotFoundError } from "../libs/appError";
 import { Post } from "../models";
 
 class PostService {
@@ -29,6 +31,20 @@ class PostService {
 
       return { posts, currentPage: page, totalPosts };
     } catch (error) {
+      throw new InternalServerError("Server is error");
+    }
+  }
+
+  async getById(id: number) {
+    try {
+      const post = await prisma.post.findFirstOrThrow({ where: { id } });
+      return post;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code == PrismaErrorCode.RECORD_NOT_FOUND) {
+          throw new NotFoundError("Post not found");
+        }
+      }
       throw new InternalServerError("Server is error");
     }
   }

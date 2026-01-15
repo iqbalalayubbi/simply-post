@@ -97,6 +97,38 @@ describe("Post routes", () => {
     expect(res.body.message).toMatch(/number/i); // "Expected number, received string"
   });
 
+  it("should get a post by id and return 200", async () => {
+    // buat dulu sebuah post
+    const created = await request(app)
+      .post(postBase)
+      .set("Authorization", `Bearer ${token}`)
+      .field("caption", "Lookup post")
+      .attach("photo", Buffer.from("dummy image content"), {
+        filename: "lookup.jpg",
+        contentType: "image/jpeg",
+      });
+
+    const postId = created.body.data.id;
+
+    const res = await request(app).get(`${postBase}/${postId}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("success");
+    expect(res.body.data).toMatchObject({
+      id: postId,
+      caption: "Lookup post",
+      user_id: expect.any(Number),
+    });
+  });
+
+  it("should return 404 when post id is not found", async () => {
+    const res = await request(app).get(`${postBase}/999999`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.status).toBe("error");
+    expect(res.body.message).toMatch(/post not found/i);
+  });
+
   it("should return 401 when token is missing", async () => {
     const res = await request(app)
       .post(postBase)
