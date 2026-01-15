@@ -1,7 +1,7 @@
 import "./config/dotenvConfig";
 import express, { Application } from "express";
 import apiRouter from "./routes";
-import { errorHandler, notFound } from "./middlewares";
+import { errorHandler, morganMiddleware, notFound } from "./middlewares";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
@@ -13,6 +13,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "*" }));
+app.use(morganMiddleware);
 
 app.use("/uploads", express.static(path.join(process.cwd(), "public/uploads")));
 

@@ -2,10 +2,13 @@ import { ZodError, ZodObject } from "zod";
 import { Request, Response, NextFunction } from "express";
 import { ValidationError } from "../libs/appError";
 
-const validateBody = (schema: ZodObject) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+type Source = "body" | "query" | "params";
+
+const validateRequest = (schema: ZodObject, source: Source) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
     try {
-      req.body = await schema.parseAsync(req.body);
+      const parsed = await schema.parseAsync(req[source]);
+      Object.assign(req[source], parsed);
       next();
     } catch (error) {
       if (error instanceof ZodError) {
@@ -17,4 +20,4 @@ const validateBody = (schema: ZodObject) => {
   };
 };
 
-export default validateBody;
+export default validateRequest;

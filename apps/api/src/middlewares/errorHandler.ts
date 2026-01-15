@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../libs/appError";
 import { HttpStatus } from "../enums";
+import { logger } from "../utils";
 
 const errorHandler = (
-  err: AppError,
+  err: AppError | Error,
   req: Request,
   res: Response,
   _next: NextFunction
@@ -15,6 +16,12 @@ const errorHandler = (
       data: null,
     });
   }
+
+  logger.error(err.message, {
+    stack: err.stack,
+    method: req.method,
+    url: req.originalUrl,
+  });
 
   // not found route
   return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({

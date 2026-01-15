@@ -37,11 +37,22 @@ class MulterService {
     return this.upload.single(inputName);
   }
 
-  mergeFileNameToRequest(req: Request, _res: Response, next: NextFunction) {
-    req.body.image_url = req.file?.filename;
+  private toImageUrl(req: Request, fileName?: string) {
+    return fileName
+      ? `${req.protocol}://${req.get("host")}/uploads/photos/${fileName}`
+      : null;
+  }
+
+  mergeFileNameToRequest = (
+    req: Request,
+    _res: Response,
+    next: NextFunction
+  ) => {
+    const filename = req.file?.filename;
+    req.body.image_url = this.toImageUrl(req, filename);
     req.body.user_id = Number(req.jwtPayload?.id);
     next();
-  }
+  };
 }
 
 export default MulterService;

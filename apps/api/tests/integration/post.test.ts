@@ -75,6 +75,28 @@ describe("Post routes", () => {
     expect(res.body.message).toMatch(/Caption at least 1 characters/);
   });
 
+  it("should get posts with default pagination", async () => {
+    // pastikan sudah ada minimal 1 post dari test sebelumnya
+    const res = await request(app).get(postBase);
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("success");
+    expect(res.body.data).toMatchObject({
+      currentPage: 1,
+      totalPosts: expect.any(Number),
+    });
+    expect(Array.isArray(res.body.data.posts)).toBe(true);
+    expect(res.body.data.posts.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("should return 400 when query params are invalid", async () => {
+    const res = await request(app).get(`${postBase}?limit=abc&page=1`);
+
+    expect(res.status).toBe(400);
+    expect(res.body.status).toBe("error");
+    expect(res.body.message).toMatch(/number/i); // "Expected number, received string"
+  });
+
   it("should return 401 when token is missing", async () => {
     const res = await request(app)
       .post(postBase)

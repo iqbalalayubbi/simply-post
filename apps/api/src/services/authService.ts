@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
 class AuthService {
   constructor(private userService: UserService) {}
 
-  async register(user: User) {
+  register = async (user: User) => {
     const hashPassword = bcrypt.hashSync(
       user.password,
       parseInt(process.env.SALT_PASSWORD as string)
@@ -15,9 +15,9 @@ class AuthService {
     const userData = { ...user, password: hashPassword };
     const newUser = await this.userService.create(userData);
     return newUser;
-  }
+  };
 
-  async login(userLogin: { identifier: string; password: string }) {
+  login = async (userLogin: { identifier: string; password: string }) => {
     // username | email
     const userFilter = userLogin.identifier.includes("@")
       ? { email: userLogin.identifier }
@@ -47,7 +47,7 @@ class AuthService {
     }
 
     return null;
-  }
+  };
 }
 
 export default AuthService;

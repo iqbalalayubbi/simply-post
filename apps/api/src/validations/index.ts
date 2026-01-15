@@ -1,4 +1,4 @@
 import { registerSchema, loginSchema } from "./userValidation";
-import { createPostSchema } from "./postValidation";
+import { createPostSchema, getPostsSchema } from "./postValidation";
 
-export { registerSchema, loginSchema, createPostSchema };
+export { registerSchema, loginSchema, createPostSchema, getPostsSchema };
