@@ -1,6 +1,5 @@
 import request from "supertest";
 import app from "../../src/app";
-// import prisma from "../../src/config/prisma";
 import { cleanDatabase, prisma } from "../utils/testHelper";
 
 describe("Auth routes", () => {

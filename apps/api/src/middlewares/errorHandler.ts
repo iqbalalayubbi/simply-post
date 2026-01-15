@@ -1,8 +1,13 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { AppError } from "../libs/appError";
 import { HttpStatus } from "../enums";
 
-const errorHandler = (err: AppError, req: Request, res: Response) => {
+const errorHandler = (
+  err: AppError,
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       status: "error",

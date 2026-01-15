@@ -1,15 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { HttpStatus } from "../enums";
 import { JwtPayload, ResponseType } from "../types";
-import jwt from "jsonwebtoken";
-import { config } from "../config";
 import { jwtService } from "../services";
 
-interface ExtendRequest extends Request {
-  jwtPayload: JwtPayload;
-}
-
-const verifyToken = (req: ExtendRequest, res: Response, next: NextFunction) => {
+const verifyToken = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
 
   const token = authHeader && authHeader.split(" ")[1];
