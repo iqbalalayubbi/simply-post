@@ -8,7 +8,11 @@ class PostController {
   constructor(private postService: PostService) {}
 
   create = async (req: Request, res: Response) => {
-    const newPost = await this.postService.create(req.body);
+    const userId = req.jwtPayload?.id;
+    const newPost = await this.postService.create({
+      ...req.body,
+      user_id: userId,
+    });
 
     const response: ResponseType = {
       data: newPost,
@@ -35,13 +39,26 @@ class PostController {
       limit: Number(req.query?.limit ?? 5),
       page: Number(req.query?.page ?? 1),
     };
-    console.log({ params });
 
     const posts = await this.postService.getAll(params);
 
     const response: ResponseType = {
       data: posts,
       message: "Received posts successfully",
+      status: "success",
+    };
+
+    res.status(HttpStatus.OK).json(response);
+  };
+
+  deletePostById = async (req: Request, res: Response) => {
+    const userId = Number(req.jwtPayload?.id);
+    const postId = Number(req.params.id);
+    await this.postService.deleteById(postId, userId);
+
+    const response: ResponseType = {
+      data: null,
+      message: "Post successfully deleted",
       status: "success",
     };
 

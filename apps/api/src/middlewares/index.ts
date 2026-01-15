@@ -3,6 +3,7 @@ import notFound from "./notFound";
 import validateRequest from "./validateRequest";
 import { verifyToken } from "./authMiddleware";
 import morganMiddleware from "./morganMiddleware";
+import parseImageUrl from "./parseImageUrl";
 
 export {
   errorHandler,
@@ -10,4 +11,5 @@ export {
   validateRequest,
   verifyToken,
   morganMiddleware,
+  parseImageUrl,
 };

@@ -129,6 +129,67 @@ describe("Post routes", () => {
     expect(res.body.message).toMatch(/post not found/i);
   });
 
+  it("should delete own post and return 200", async () => {
+    const created = await request(app)
+      .post(postBase)
+      .set("Authorization", `Bearer ${token}`)
+      .field("caption", "Delete me")
+      .attach("photo", Buffer.from("dummy image content"), {
+        filename: "todelete.jpg",
+        contentType: "image/jpeg",
+      });
+
+    const postId = created.body.data.id;
+
+    const res = await request(app)
+      .delete(`${postBase}/${postId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("success");
+
+    // optional: verify it is gone
+    const getRes = await request(app).get(`${postBase}/${postId}`);
+    expect(getRes.status).toBe(404);
+  });
+
+  it("should return 403 when deleting post of another user", async () => {
+    // buat post oleh user utama
+    const created = await request(app)
+      .post(postBase)
+      .set("Authorization", `Bearer ${token}`)
+      .field("caption", "Not yours");
+
+    const postId = created.body.data.id;
+
+    // user lain
+    await request(app).post(`${authBase}/register`).send({
+      username: "poster2",
+      email: "poster2@example.com",
+      password: "Password123!",
+    });
+    const loginRes = await request(app)
+      .post(`${authBase}/login`)
+      .send({ identifier: "poster2@example.com", password: "Password123!" });
+    const otherToken = loginRes.body.data?.token;
+
+    const res = await request(app)
+      .delete(`${postBase}/${postId}`)
+      .set("Authorization", `Bearer ${otherToken}`);
+
+    expect(res.status).toBe(403);
+    expect(res.body.message).toMatch(/not authorized/i);
+  });
+
+  it("should return 404 when deleting non-existent post", async () => {
+    const res = await request(app)
+      .delete(`${postBase}/999999`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toMatch(/post not found/i);
+  });
+
   it("should return 401 when token is missing", async () => {
     const res = await request(app)
       .post(postBase)
