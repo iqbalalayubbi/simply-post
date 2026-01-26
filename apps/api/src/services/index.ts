@@ -10,4 +10,4 @@ const jwtService = new JwtService();
 const multerService = new MulterService("photos");
 const postService = new PostService();
 
-export { authService, jwtService, multerService, postService };
+export { authService, jwtService, multerService, postService, userService };

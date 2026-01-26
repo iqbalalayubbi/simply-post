@@ -15,4 +15,11 @@ const loginSchema = z.object({
   password: z.string(),
 });
 
-export { registerSchema, loginSchema };
+const updateUserSchema = z.object({
+  bio: z.string().optional(),
+  avatar_url: z.url().optional().nullable(),
+});
+
+export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
+
+export { registerSchema, loginSchema, updateUserSchema };

@@ -10,7 +10,7 @@ router.post(
   "/",
   verifyToken,
   multerService.singleUpload("photo"),
-  parseImageUrl,
+  parseImageUrl("image_url"),
   validateRequest(createPostSchema, "body"),
   postController.create,
 );
@@ -24,7 +24,7 @@ router.patch(
   "/:id",
   verifyToken,
   multerService.singleUpload("photo"),
-  parseImageUrl,
+  parseImageUrl("image_url"),
   postController.updateById,
 );
 router.delete("/:id", verifyToken, postController.deletePostById);
