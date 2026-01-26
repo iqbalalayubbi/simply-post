@@ -64,6 +64,28 @@ class PostController {
 
     res.status(HttpStatus.OK).json(response);
   };
+
+  updateById = async (req: Request, res: Response) => {
+    const postId = Number(req.params.id);
+    const userId = Number(req.jwtPayload?.id);
+
+    const file = req.file;
+
+    const updatedPost = await this.postService.updateById(
+      postId,
+      userId,
+      req.body,
+      file,
+    );
+
+    const response: ResponseType = {
+      data: updatedPost,
+      message: "Post successfully updated",
+      status: "success",
+    };
+
+    res.status(HttpStatus.OK).json(response);
+  };
 }
 
 export default PostController;

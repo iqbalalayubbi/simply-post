@@ -190,6 +190,111 @@ describe("Post routes", () => {
     expect(res.body.message).toMatch(/post not found/i);
   });
 
+  it("should update a post caption and return 200", async () => {
+    const created = await request(app)
+      .post(postBase)
+      .set("Authorization", `Bearer ${token}`)
+      .field("caption", "Before update")
+      .attach("photo", Buffer.from("dummy image content"), {
+        filename: "before.jpg",
+        contentType: "image/jpeg",
+      });
+
+    const postId = created.body.data.id;
+    const oldImage = created.body.data.image_url;
+
+    const res = await request(app)
+      .patch(`${postBase}/${postId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .field("caption", "After update");
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("success");
+    expect(res.body.data).toMatchObject({
+      id: postId,
+      caption: "After update",
+      user_id: expect.any(Number),
+    });
+    expect(res.body.data.image_url).toBe(oldImage);
+  });
+
+  it("should update post image and return 200", async () => {
+    const created = await request(app)
+      .post(postBase)
+      .set("Authorization", `Bearer ${token}`)
+      .field("caption", "Update image")
+      .attach("photo", Buffer.from("dummy image content"), {
+        filename: "old.jpg",
+        contentType: "image/jpeg",
+      });
+
+    const postId = created.body.data.id;
+    const oldImage = created.body.data.image_url;
+
+    const res = await request(app)
+      .patch(`${postBase}/${postId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .attach("photo", Buffer.from("new dummy image content"), {
+        filename: "new.jpg",
+        contentType: "image/jpeg",
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("success");
+    expect(res.body.data).toMatchObject({
+      id: postId,
+      caption: "Update image",
+      user_id: expect.any(Number),
+    });
+    expect(res.body.data.image_url).toMatch(/\.jpg$/);
+    expect(res.body.data.image_url).not.toBe(oldImage);
+  });
+
+  it("should return 404 when updating non-existent post", async () => {
+    const res = await request(app)
+      .patch(`${postBase}/999999`)
+      .set("Authorization", `Bearer ${token}`)
+      .field("caption", "Nope");
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toMatch(/post not found/i);
+  });
+
+  it("should return 401 when updating post of another user", async () => {
+    const created = await request(app)
+      .post(postBase)
+      .set("Authorization", `Bearer ${token}`)
+      .field("caption", "Owned by poster1");
+
+    const postId = created.body.data.id;
+
+    await request(app).post(`${authBase}/register`).send({
+      username: "poster3",
+      email: "poster3@example.com",
+      password: "Password123!",
+    });
+    const loginRes = await request(app)
+      .post(`${authBase}/login`)
+      .send({ identifier: "poster3@example.com", password: "Password123!" });
+    const otherToken = loginRes.body.data?.token;
+
+    const res = await request(app)
+      .patch(`${postBase}/${postId}`)
+      .set("Authorization", `Bearer ${otherToken}`)
+      .field("caption", "Hacked");
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toMatch(/not authorized/i);
+  });
+
+  it("should return 401 when token is missing on update", async () => {
+    const res = await request(app)
+      .patch(`${postBase}/1`)
+      .field("caption", "No auth update");
+
+    expect(res.status).toBe(401);
+  });
+
   it("should return 401 when token is missing", async () => {
     const res = await request(app)
       .post(postBase)

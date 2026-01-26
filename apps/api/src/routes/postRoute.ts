@@ -12,14 +12,21 @@ router.post(
   multerService.singleUpload("photo"),
   parseImageUrl,
   validateRequest(createPostSchema, "body"),
-  postController.create
+  postController.create,
 );
 router.get(
   "/",
   validateRequest(getPostsSchema, "query"),
-  postController.getAllPosts
+  postController.getAllPosts,
 );
 router.get("/:id", postController.getPostById);
+router.patch(
+  "/:id",
+  verifyToken,
+  multerService.singleUpload("photo"),
+  parseImageUrl,
+  postController.updateById,
+);
 router.delete("/:id", verifyToken, postController.deletePostById);
 
 export default router;

@@ -6,6 +6,7 @@ import {
   ForbiddenError,
   InternalServerError,
   NotFoundError,
+  UnauthorizedError,
 } from "../libs/appError";
 import { Post } from "../models";
 import fs from "fs";
@@ -90,6 +91,52 @@ class PostService {
       }
       throw new InternalServerError("Server is error");
     }
+  }
+
+  async updateById(
+    postId: number,
+    userId: number,
+    data: Post,
+    newImage: Express.Multer.File | undefined,
+  ) {
+    // find post by user id
+    const existingPost = await prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!existingPost) {
+      throw new NotFoundError("Post not found");
+    }
+
+    if (existingPost.user_id !== userId) {
+      throw new UnauthorizedError("You are not authorized");
+    }
+
+    const oldUrlImage = existingPost?.image_url;
+
+    const updatePayload = {
+      caption: data.caption,
+      image_url: oldUrlImage,
+    };
+
+    if (newImage) {
+      if (oldUrlImage) {
+        const oldFilePath = path.join(process.cwd(), "uploads", oldUrlImage);
+
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      }
+
+      updatePayload.image_url = newImage.filename;
+    }
+
+    const updatePost = await prisma.post.update({
+      where: { id: postId },
+      data: updatePayload,
+    });
+
+    return updatePost;
   }
 }
 
