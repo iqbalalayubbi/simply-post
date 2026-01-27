@@ -14,12 +14,32 @@ model User {
   password String
   bio String?
   avatar_url String
+
+  // self referencing
+  // as followers
+  following Follow[] @relation("UserFollows")
+  // as followings
+  followers Follow[] @relation("UserFollowers")
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   posts Post[]
   likes Like[]
   comments Comment[]
+}
+
+model Follow{
+  follower_id Int
+  following_id Int
+  created_at DateTime @default(now())
+
+  follower User @relation("UserFollows", fields: [follower_id], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [following_id], references: [id], onDelete: Cascade)
+
+
+  @@id([follower_id, following_id])
+  @@map("follows")
 }
 
 model Post{

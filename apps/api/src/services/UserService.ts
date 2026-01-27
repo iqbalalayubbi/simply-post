@@ -167,6 +167,111 @@ class UserService {
       throw error;
     }
   }
+
+  async toggleFollow(currentUserId: number, otherUserId: number) {
+    try {
+      if (currentUserId === otherUserId) {
+        throw new ValidationError("You cannot follow yourself  ~_~");
+      }
+
+      // check other user
+      const otherUser = await prisma.user.findUnique({
+        where: { id: otherUserId },
+      });
+
+      if (!otherUser) throw new NotFoundError("User not found");
+
+      // check status follow
+      const isFollowUser = await prisma.follow.findUnique({
+        where: {
+          follower_id_following_id: {
+            follower_id: currentUserId,
+            following_id: otherUserId,
+          },
+        },
+      });
+
+      if (isFollowUser) {
+        // unfollow user
+        await prisma.follow.delete({
+          where: {
+            follower_id_following_id: {
+              follower_id: currentUserId,
+              following_id: otherUserId,
+            },
+          },
+        });
+        return { isFollowing: false };
+      } else {
+        // follow
+        await prisma.follow.create({
+          data: {
+            follower_id: currentUserId,
+            following_id: otherUserId,
+          },
+        });
+
+        return { isFollowing: true };
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getFollowers(userId: number) {
+    const followers = await prisma.follow.findMany({
+      where: { following_id: userId },
+      include: {
+        follower: {
+          select: {
+            id: true,
+            username: true,
+            avatar_url: true,
+          },
+        },
+      },
+    });
+
+    return followers.map((item) => item.follower);
+  }
+
+  async getFollowing(userId: number) {
+    const following = await prisma.follow.findMany({
+      where: {
+        follower_id: userId,
+      },
+      include: {
+        following: {
+          select: {
+            id: true,
+            username: true,
+            avatar_url: true,
+            bio: true,
+          },
+        },
+      },
+    });
+
+    return following.map((item) => item.following);
+  }
+
+  async getInteractions(username: string) {
+    const user = await prisma.user.findUnique({ where: { username } });
+
+    if (!user) throw new NotFoundError("User not found");
+
+    const followerCount = await prisma.follow.count({
+      where: {
+        following_id: user.id,
+      },
+    });
+
+    const followingCount = await prisma.follow.count({
+      where: { follower_id: user.id },
+    });
+
+    return { totalFollowers: followerCount, totalFollowings: followingCount };
+  }
 }
 
 export default UserService;
