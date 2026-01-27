@@ -1,8 +1,12 @@
 import express, { Router } from "express";
 import { multerService } from "../services";
-import { postController } from "../controllers";
+import { commentController, postController } from "../controllers";
 import { parseImageUrl, validateRequest, verifyToken } from "../middlewares";
-import { createPostSchema, getPostsSchema } from "../validations";
+import {
+  createCommentSchema,
+  createPostSchema,
+  getPostsSchema,
+} from "../validations";
 
 const router: Router = express.Router();
 
@@ -35,6 +39,13 @@ router.patch(
 router.post("/:id/like", verifyToken, postController.toggleLike);
 
 // comment post
+router.post(
+  "/:id/comments",
+  verifyToken,
+  validateRequest(createCommentSchema, "body"),
+  commentController.createComment,
+);
+router.get("/:id/comments", commentController.getCommentByPostId);
 
 // delete post
 router.delete("/:id", verifyToken, postController.deletePostById);

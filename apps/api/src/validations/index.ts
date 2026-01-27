@@ -6,6 +6,10 @@ import {
   updateUserSchema,
   updatePasswordSchema,
 } from "./userValidation";
+import {
+  type CreateCommentDTO,
+  createCommentSchema,
+} from "./commentValidation";
 import { createPostSchema, getPostsSchema } from "./postValidation";
 
 export {
@@ -15,6 +19,8 @@ export {
   getPostsSchema,
   updateUserSchema,
   updatePasswordSchema,
+  createCommentSchema,
   type UpdateUserDTO,
   type UpdatePasswordDTO,
+  type CreateCommentDTO,
 };
