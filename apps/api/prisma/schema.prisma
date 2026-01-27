@@ -14,10 +14,12 @@ model User {
   password String
   bio String?
   avatar_url String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   posts Post[]
   likes Like[]
-  comment Comment[]
+  comments Comment[]
 }
 
 model Post{
@@ -37,9 +39,10 @@ model Like{
   id Int @id @default(autoincrement())
   user_id Int
   post_id Int
+  created_at DateTime @default(now())
 
-  user User @relation(fields: [user_id], references: [id])
-  post Post @relation(fields: [post_id], references: [id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, post_id])
 }

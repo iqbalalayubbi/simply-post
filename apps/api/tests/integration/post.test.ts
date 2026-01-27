@@ -250,6 +250,66 @@ describe("Post routes", () => {
     expect(res.body.data.image_url).not.toBe(oldImage);
   });
 
+  it("should like a post and return 200", async () => {
+    const created = await request(app)
+      .post(postBase)
+      .set("Authorization", `Bearer ${token}`)
+      .field("caption", "Like me");
+
+    const postId = created.body.data.id;
+
+    const res = await request(app)
+      .post(`${postBase}/${postId}/like`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("success");
+    expect(res.body.data).toMatchObject({
+      isLiked: false,
+      totalLikes: expect.any(Number),
+    });
+  });
+
+  it("should unlike a previously liked post and return 200", async () => {
+    const created = await request(app)
+      .post(postBase)
+      .set("Authorization", `Bearer ${token}`)
+      .field("caption", "Like then unlike");
+
+    const postId = created.body.data.id;
+
+    // like
+    await request(app)
+      .post(`${postBase}/${postId}/like`)
+      .set("Authorization", `Bearer ${token}`);
+
+    // unlike
+    const res = await request(app)
+      .post(`${postBase}/${postId}/like`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("success");
+    expect(res.body.data).toMatchObject({
+      isLiked: true,
+      totalLikes: expect.any(Number),
+    });
+  });
+
+  it("should return 404 when liking non-existent post", async () => {
+    const res = await request(app)
+      .post(`${postBase}/999999/like`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toMatch(/post not found/i);
+  });
+
+  it("should return 401 when token is missing on like", async () => {
+    const res = await request(app).post(`${postBase}/1/like`);
+    expect(res.status).toBe(401);
+  });
+
   it("should return 404 when updating non-existent post", async () => {
     const res = await request(app)
       .patch(`${postBase}/999999`)

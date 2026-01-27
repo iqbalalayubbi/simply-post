@@ -22,7 +22,10 @@ class PostService {
     }
   }
 
-  async getAll(params: { limit: number; page: number }) {
+  async getAll(
+    params: { limit: number; page: number },
+    currentUserId?: number,
+  ) {
     //  limit -> total data to show | page -> current page that active
     const { limit, page } = params;
     const skipData = (page - 1) * limit;
@@ -34,10 +37,33 @@ class PostService {
         orderBy: {
           created_at: "desc",
         },
+        include: {
+          user: {
+            select: { id: true, username: true, avatar_url: true },
+          },
+          _count: {
+            select: { likes: true },
+          },
+          likes: currentUserId
+            ? {
+                where: { user_id: currentUserId },
+                select: { user_id: true },
+              }
+            : false,
+        },
       });
       const totalPosts = await prisma.post.count();
 
-      return { posts, currentPage: page, totalPosts };
+      const formattedPosts = posts.map((post) => {
+        const { _count, likes, ...postData } = post;
+        return {
+          postData,
+          total_likes: _count.likes,
+          is_liked: likes?.length > 0 || false,
+        };
+      });
+
+      return { posts: formattedPosts, currentPage: page, totalPosts };
     } catch (error) {
       throw new InternalServerError("Server is error");
     }
@@ -137,6 +163,50 @@ class PostService {
     });
 
     return updatePost;
+  }
+
+  async toggleLike(postId: number, userId: number) {
+    try {
+      // check post status, it has been like or not
+      const post = await prisma.post.findUnique({ where: { id: postId } });
+
+      if (!post) throw new NotFoundError("Post not found");
+
+      // check if user already like or not
+      const isLiked = await prisma.like.findUnique({
+        where: {
+          user_id_post_id: {
+            post_id: postId,
+            user_id: userId,
+          },
+        },
+      });
+
+      if (isLiked) {
+        // delete like
+        await prisma.like.delete({
+          where: {
+            user_id_post_id: {
+              post_id: postId,
+              user_id: userId,
+            },
+          },
+        });
+      } else {
+        // add new like
+        await prisma.like.create({
+          data: { post_id: postId, user_id: userId },
+        });
+      }
+
+      const totalLikes = await prisma.like.count({
+        where: { post_id: postId },
+      });
+
+      return { isLiked: isLiked ? true : false, totalLikes };
+    } catch (error) {
+      throw error;
+    }
   }
 }
 

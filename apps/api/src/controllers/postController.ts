@@ -86,6 +86,21 @@ class PostController {
 
     res.status(HttpStatus.OK).json(response);
   };
+
+  toggleLike = async (req: Request, res: Response) => {
+    const postId = Number(req.params.id);
+    const userId = Number(req.jwtPayload?.id);
+
+    const result = await this.postService.toggleLike(postId, userId);
+
+    const response: ResponseType = {
+      status: "success",
+      message: result.isLiked ? "Post liked" : "Post unliked",
+      data: result,
+    };
+
+    res.status(HttpStatus.OK).json(response);
+  };
 }
 
 export default PostController;
