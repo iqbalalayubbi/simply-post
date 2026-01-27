@@ -20,6 +20,12 @@ const updateUserSchema = z.object({
   avatar_url: z.url().optional().nullable(),
 });
 
-export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
+const updatePasswordSchema = z.object({
+  old_password: z.string(),
+  new_password: z.string().min(6, "Password must be at least 6 characters"),
+});
 
-export { registerSchema, loginSchema, updateUserSchema };
+export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
+export type UpdatePasswordDTO = z.infer<typeof updatePasswordSchema>;
+
+export { registerSchema, loginSchema, updateUserSchema, updatePasswordSchema };

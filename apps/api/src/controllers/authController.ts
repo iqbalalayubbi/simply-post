@@ -7,7 +7,7 @@ import JwtService from "../services/jwtService";
 class AuthController {
   constructor(
     private authService: AuthService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
   register = async (req: Request, res: Response, next: NextFunction) => {
@@ -44,6 +44,18 @@ class AuthController {
     } catch (error) {
       next(error);
     }
+  };
+
+  changePassword = async (req: Request, res: Response) => {
+    const userId = Number(req.jwtPayload?.id);
+
+    await this.authService.changePassword(userId, req.body);
+
+    res.status(HttpStatus.OK).json({
+      status: "success",
+      message: "Password updated successfully",
+      data: true,
+    });
   };
 
   refreshToken = (req: Request, res: Response, next: NextFunction) => {

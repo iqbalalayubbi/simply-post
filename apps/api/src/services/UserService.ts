@@ -122,6 +122,51 @@ class UserService {
       throw error;
     }
   }
+
+  async updatePasswordHash(userId: number, newPasswordHash: string) {
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { password: newPasswordHash },
+      });
+
+      return true;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case PrismaErrorCode.NULL_CONSTRAINT:
+            throw new ValidationError("Required field is missing");
+          default:
+            throw new InternalServerError("Database operation failed");
+        }
+      }
+
+      throw error;
+    }
+  }
+
+  async getUserData(userId: number) {
+    try {
+      const userData = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!userData) throw new NotFoundError("User not found");
+
+      return userData;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case PrismaErrorCode.NULL_CONSTRAINT:
+            throw new ValidationError("Required field is missing");
+          default:
+            throw new InternalServerError("Database operation failed");
+        }
+      }
+
+      throw error;
+    }
+  }
 }
 
 export default UserService;

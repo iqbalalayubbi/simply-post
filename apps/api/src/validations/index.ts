@@ -1,8 +1,10 @@
 import {
   type UpdateUserDTO,
+  type UpdatePasswordDTO,
   registerSchema,
   loginSchema,
   updateUserSchema,
+  updatePasswordSchema,
 } from "./userValidation";
 import { createPostSchema, getPostsSchema } from "./postValidation";
 
@@ -12,5 +14,7 @@ export {
   createPostSchema,
   getPostsSchema,
   updateUserSchema,
+  updatePasswordSchema,
   type UpdateUserDTO,
+  type UpdatePasswordDTO,
 };
